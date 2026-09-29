@@ -2,38 +2,31 @@
 
 Requirements: JDK 25, Android SDK 37, NDK 28.2.13676358 and the included Gradle wrapper.
 
-## Source and CI builds
+## GitHub Actions release build
+
+The `Android release` workflow builds and uploads only a signed Release APK. It runs after a push to any branch, for pull requests, or when started manually from the Actions page. It does not build or upload a Debug APK.
+
+Configure these repository Actions secrets before running it:
+
+- `DIPLAY_IDENTITY_PK8_B64`: Base64-encoded `identity.pk8` used for runtime CarPlay authentication.
+- `DIPLAY_CERTIFICATE_P7B_B64`: Base64-encoded `certificate.p7b` used for runtime CarPlay authentication.
+- `ANDROID_KEYSTORE_B64`: Base64-encoded Android Release keystore.
+- `ANDROID_KEYSTORE_PASSWORD`: Keystore password.
+- `ANDROID_KEY_ALIAS`: Signing-key alias.
+- `ANDROID_KEY_PASSWORD`: Signing-key password.
+
+The workflow reconstructs these files under the temporary runner directory, builds `:mobile:assembleRelease`, uploads the APK as the `diplay-release-apk` artifact, and removes the temporary credential files afterward. If any secret is missing, the workflow fails instead of producing an incomplete APK.
+
+Keep a secure backup of the keystore and its passwords. Every future update to the same installed app must be signed by the same key. Do not commit the authentication files, keystore, passwords, or encoded secret values to Git.
+
+## Optional local Release packaging
+
+Provide an external asset directory using `DIPLAY_AUTH_ASSETS_DIR`. It must contain `offline-mfi/identity.pk8` and `offline-mfi/certificate.p7b`. Set `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, and `ANDROID_KEY_PASSWORD` for the Android signing key.
 
 ```sh
-./gradlew :shared:testDebugUnitTest :common:testDebugUnitTest :mobile:lintDebug :mobile:assembleDebug
+./gradlew :shared:testReleaseUnitTest :common:testReleaseUnitTest :mobile:lintRelease :mobile:assembleRelease
 ```
 
-The resulting source-only APK contains no accessory identity. Standalone CarPlay requires runtime authentication provisioning. Tests generate synthetic identities at runtime; no test private-key files are tracked.
+Output: `mobile/build/outputs/apk/release/mobile-release.apk`. The Release APK deliberately contains the experimental identity described in the notices, so recipients can extract it. The Android signing key is not included in the APK.
 
-## Local release packaging
-
-Provide an external asset directory using `DIPLAY_AUTH_ASSETS_DIR`. The directory must contain exactly the intended runtime files under `offline-mfi/identity.pk8` and `offline-mfi/certificate.p7b`. Neither file belongs in Git. The build permits those two files only when this explicit input is set and rejects unexpected credential containers elsewhere in APK assets.
-
-Set `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, and `ANDROID_KEY_PASSWORD` locally for your Android signing key. Never commit these values or the keystore. Different signing keys cannot update an existing project-signed installation.
-
-```sh
-./gradlew :shared:testDebugUnitTest :common:testDebugUnitTest :mobile:lintRelease :mobile:assembleRelease
-```
-
-Output: `mobile/build/outputs/apk/release/mobile-release.apk`. The release APK deliberately contains the experimental identity described in the notices; it is extractable by recipients. The separate Android signing key is not included. The retired build-beta.py helper is not used; this Gradle workflow uses explicit environment inputs.
-
-The public release source archive corresponds to the tagged source and excludes runtime identities, signing keys, local configuration and build output.
-
-## Standalone car-test APK
-
-Use `:mobile:assembleStandaloneDebug` for a test APK that must connect to an iPhone:
-
-```sh
-DIPLAY_AUTH_ASSETS_DIR=/absolute/path/to/runtime-assets ./gradlew :mobile:assembleStandaloneDebug
-```
-
-This task refuses missing or empty runtime inputs. `assembleDebug` remains an identity-free
-source/CI build when the explicit asset input is absent; do not install that output as a
-standalone car-test package. Before delivery, verify both `assets/offline-mfi/identity.pk8`
-and `assets/offline-mfi/certificate.p7b` in the APK against the selected local inputs.
-Update the existing test app without uninstalling it to preserve its settings.
+The public source archive excludes runtime identities, signing keys, local configuration, APKs, and build output.

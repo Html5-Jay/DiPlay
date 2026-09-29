@@ -32,7 +32,7 @@ The release changes were tested on the development DiLink5.1 car: live windshiel
 - [Release notes](CHANGELOG.md)
 - [Credits and licenses](docs/THIRD_PARTY_NOTICES.md)
 
-The website is available in English, Arabic, Russian, Spanish and Simplified Chinese. The current app interface is English.
+The website and app interface are available in English, Arabic, Russian, Spanish and Simplified Chinese.
 
 ## Source and credits
 
@@ -42,4 +42,4 @@ This repository starts with a clean public source snapshot. Local research, test
 
 ## Local release packaging
 
-The release APK intentionally contains the experimental accessory identity. The Git repository and source archive exclude all accessory and Android signing keys; tests generate synthetic identities at runtime. Source/CI builds omit runtime identity assets by default. Local release builds explicitly select an external asset directory. Publishing the APK makes its bundled identity extractable; building locally does not preserve that identity's confidentiality.
+The release APK intentionally contains the experimental accessory identity. The Git repository and source archive exclude all accessory and Android signing keys; tests generate synthetic identities at runtime. Release builds explicitly receive the runtime identity from an external asset directory; GitHub Actions reconstructs that directory from repository secrets. Publishing the APK makes its bundled identity extractable; building it does not preserve that identity's confidentiality.

@@ -1,7 +1,8 @@
-name: Android checks
+name: Android release
 on:
   push:
-    branches: [main]
+    branches:
+      - '**'
   pull_request:
   workflow_dispatch:
 permissions:
@@ -22,14 +23,54 @@ jobs:
         with:
           packages: platform-tools platforms;android-37.0 build-tools;36.0.0 ndk;28.2.13676358
       - uses: gradle/actions/setup-gradle@v4
-      - name: Unit tests, lint and source-only debug build
-        run: ./gradlew :shared:testDebugUnitTest :common:testDebugUnitTest :mobile:lintDebug :mobile:assembleDebug --stacktrace
-      - name: Debug APK
+      - name: Prepare release credentials
+        env:
+          DIPLAY_IDENTITY_PK8_B64: ${{ secrets.DIPLAY_IDENTITY_PK8_B64 }}
+          DIPLAY_CERTIFICATE_P7B_B64: ${{ secrets.DIPLAY_CERTIFICATE_P7B_B64 }}
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          for name in \
+            DIPLAY_IDENTITY_PK8_B64 \
+            DIPLAY_CERTIFICATE_P7B_B64 \
+            ANDROID_KEYSTORE_B64 \
+            ANDROID_KEYSTORE_PASSWORD \
+            ANDROID_KEY_ALIAS \
+            ANDROID_KEY_PASSWORD
+          do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::Missing repository secret: $name"
+              exit 1
+            fi
+          done
+
+          auth_dir="$RUNNER_TEMP/diplay-auth-assets"
+          keystore_path="$RUNNER_TEMP/diplay-release.jks"
+          mkdir -p "$auth_dir/offline-mfi"
+          printf '%s' "$DIPLAY_IDENTITY_PK8_B64" | base64 --decode > "$auth_dir/offline-mfi/identity.pk8"
+          printf '%s' "$DIPLAY_CERTIFICATE_P7B_B64" | base64 --decode > "$auth_dir/offline-mfi/certificate.p7b"
+          printf '%s' "$ANDROID_KEYSTORE_B64" | base64 --decode > "$keystore_path"
+          test -s "$auth_dir/offline-mfi/identity.pk8"
+          test -s "$auth_dir/offline-mfi/certificate.p7b"
+          test -s "$keystore_path"
+          chmod 600 "$auth_dir/offline-mfi/identity.pk8" "$auth_dir/offline-mfi/certificate.p7b" "$keystore_path"
+          echo "DIPLAY_AUTH_ASSETS_DIR=$auth_dir" >> "$GITHUB_ENV"
+          echo "ANDROID_KEYSTORE_PATH=$keystore_path" >> "$GITHUB_ENV"
+      - name: Test and build signed release APK
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: ./gradlew :shared:testReleaseUnitTest :common:testReleaseUnitTest :mobile:lintRelease :mobile:assembleRelease --stacktrace
+      - name: Release APK
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: diplay-debug-apk
-          path: mobile/build/outputs/apk/debug/*.apk
+          name: diplay-release-apk
+          path: mobile/build/outputs/apk/release/*.apk
           if-no-files-found: error
           retention-days: 14
       - name: Test reports
@@ -40,4 +81,9 @@ jobs:
           path: |
             shared/build/reports/tests/
             common/build/reports/tests/
-            mobile/build/reports/lint-results-debug.html
+            mobile/build/reports/lint-results-release.html
+      - name: Remove release credentials
+        if: always()
+        run: |
+          rm -rf "$RUNNER_TEMP/diplay-auth-assets"
+          rm -f "$RUNNER_TEMP/diplay-release.jks"
