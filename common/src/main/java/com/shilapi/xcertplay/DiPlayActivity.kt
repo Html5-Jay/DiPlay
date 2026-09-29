@@ -30,6 +30,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.shilapi.xcertplay.airplay.CarPlayClusterDisplay
 import com.shilapi.xcertplay.host.R
+import com.shilapi.xcertplay.media.NavigationAudioRouting
 import com.shilapi.xcertplay.orchestration.WirelessHotspotMode
 import java.io.File
 import java.text.SimpleDateFormat
@@ -242,6 +243,32 @@ class DiPlayActivity : ComponentActivity() {
             toggle(card, "Full screen", "Hide the car’s system bars while CarPlay is open.", AirPlayPersistence.loadHideTopBar(this) && AirPlayPersistence.loadHideBottomBar(this)) {
                 AirPlayPersistence.saveHideTopBar(this, it); AirPlayPersistence.saveHideBottomBar(this, it)
             }
+        }
+        section(content, "Navigation audio", R.drawable.ic_dp_navigation) { card ->
+            val streamTypes = listOf<Int?>(null) +
+                (NavigationAudioRouting.MIN_STREAM_TYPE..NavigationAudioRouting.MAX_STREAM_TYPE).map { it }
+            val selected = streamTypes.indexOf(AirPlayPersistence.loadNavigationStreamType(this))
+                .coerceAtLeast(0)
+            val labels = streamTypes.map { streamType ->
+                when (streamType) {
+                    null -> "System default · recommended"
+                    NavigationAudioRouting.BYD_DILINK_STREAM_TYPE ->
+                        "Stream type $streamType · BYD DiLink"
+                    else -> "Stream type $streamType"
+                }
+            }
+            choice(card, "Navigation output", labels, selected) { index ->
+                AirPlayPersistence.saveNavigationStreamType(this, streamTypes[index])
+            }
+            card.addView(
+                label(
+                    "For BYD DiLink 5.0, try stream type 14. Only CarPlay guidance is rerouted; " +
+                        "music, calls and Siri keep their normal outputs. Unsupported stream types " +
+                        "fall back to the system navigation route.",
+                    14,
+                    MUTED,
+                ),
+            )
         }
         if (com.shilapi.xcertplay.hud.BydOutputSettings.available(this)) section(content, "BYD navigation", R.drawable.ic_dp_navigation) { card ->
             toggle(card, "Navigation on HUD and instrument cluster",
