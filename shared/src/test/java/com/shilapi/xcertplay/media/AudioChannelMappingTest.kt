@@ -1,6 +1,7 @@
 package com.shilapi.xcertplay.media
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class AudioChannelMappingTest {
@@ -87,6 +88,37 @@ class AudioChannelMappingTest {
             payloadType = 100,
             channel = AudioChannel.NAVIGATION,
             contentType = AudioContentType.SPEECH,
+        )
+    }
+
+    @Test
+    fun customNavigationStreamTypeOnlyAppliesToGuidance() {
+        assertEquals(
+            NavigationAudioRouting.BYD_DILINK_STREAM_TYPE,
+            NavigationAudioRouting.streamTypeFor(
+                AudioChannel.NAVIGATION,
+                NavigationAudioRouting.BYD_DILINK_STREAM_TYPE,
+            ),
+        )
+        listOf(AudioChannel.MEDIA, AudioChannel.PHONE, AudioChannel.ASSISTANT).forEach { channel ->
+            assertNull(
+                NavigationAudioRouting.streamTypeFor(
+                    channel,
+                    NavigationAudioRouting.BYD_DILINK_STREAM_TYPE,
+                ),
+            )
+        }
+        assertNull(
+            NavigationAudioRouting.streamTypeFor(
+                AudioChannel.NAVIGATION,
+                NavigationAudioRouting.SYSTEM_DEFAULT,
+            ),
+        )
+        assertNull(
+            NavigationAudioRouting.streamTypeFor(
+                AudioChannel.NAVIGATION,
+                NavigationAudioRouting.MAX_STREAM_TYPE + 1,
+            ),
         )
     }
 

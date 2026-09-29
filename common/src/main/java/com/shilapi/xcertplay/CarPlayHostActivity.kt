@@ -275,6 +275,7 @@ class CarPlayHostActivity : ComponentActivity() {
     private var hevcSoftwareDecoderEnabled = false
     private var advancedAudioChannelMappingSupported = false
     private var advancedAudioChannelMapping = false
+    private var navigationStreamType: Int? = null
     private var debugLogsEnabled = false
     private var autoStartOnBoot = false
     private var manufacturer = AirPlayPersistence.DEFAULT_MANUFACTURER
@@ -437,6 +438,7 @@ class CarPlayHostActivity : ComponentActivity() {
         advancedAudioChannelMapping =
             advancedAudioChannelMappingSupported &&
                 AirPlayPersistence.loadAdvancedAudioChannelMapping(this)
+        navigationStreamType = AirPlayPersistence.loadNavigationStreamType(this)
         debugLogsEnabled = AirPlayPersistence.loadDebugLogsEnabled(this)
         autoStartOnBoot = AirPlayPersistence.loadAutoStartOnBoot(this)
         manufacturer = AirPlayPersistence.loadManufacturer(this)
@@ -2642,6 +2644,9 @@ class CarPlayHostActivity : ComponentActivity() {
                     .append(if (advancedAudioChannelMapping) "AAOS buses" else "Mobile compatible")
                     .append('\n')
             }
+            append("Navigation audio: ")
+                .append(navigationStreamType?.let { "stream type $it" } ?: "system default")
+                .append('\n')
             append(safeAreaSummary())
         }
     }
@@ -2913,6 +2918,7 @@ class CarPlayHostActivity : ComponentActivity() {
             videoHeight = videoHeight,
             preferSoftwareHevcDecoder = hevcSoftwareDecoderEnabled,
             advancedAudioChannelMapping = advancedAudioChannelMapping,
+            navigationStreamType = navigationStreamType,
             onScreenStreamActiveChanged = { type, active ->
                 onScreenStreamStateChanged(controllerGeneration, type, active)
             },
