@@ -566,7 +566,7 @@ class CarPlayHostActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         val languagePreference = AppLocale.preference(this)
-        if (languagePreference != languagePreferenceAtCreate) {
+        if (Build.VERSION.SDK_INT < 33 && languagePreference != languagePreferenceAtCreate) {
             languagePreferenceAtCreate = languagePreference
             recreate()
             return
@@ -1358,6 +1358,12 @@ class CarPlayHostActivity : ComponentActivity() {
                 ViewGroup.LayoutParams.WRAP_CONTENT,
             ).apply { topMargin = dp(12) },
         )
+
+        content.addView(Button(this).apply {
+            text = getString(R.string.language_app_language)
+            isAllCaps = false
+            setOnClickListener { AppLocale.showPicker(this@CarPlayHostActivity) }
+        }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(12) })
 
         val scroll = ScrollView(this).apply {
             isFillViewport = true
@@ -2653,8 +2659,11 @@ class CarPlayHostActivity : ComponentActivity() {
                     .append(if (advancedAudioChannelMapping) getString(R.string.mapping_aaos_buses) else getString(R.string.mapping_mobile_compatible))
                     .append('\n')
             }
-            append("Navigation audio: ")
-                .append(navigationStreamType?.let { "stream type $it" } ?: "system default")
+            append(getString(R.string.preview_navigation_audio))
+                .append(
+                    navigationStreamType?.let { getString(R.string.navigation_stream_type_value, it) }
+                        ?: getString(R.string.language_system_default),
+                )
                 .append('\n')
             append(safeAreaSummary())
         }

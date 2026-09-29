@@ -403,4 +403,20 @@
     <string name="byd_dilink_navigation_audio_hint">比亚迪 DiLink 5.0 建议选择流类型 14。仅 CarPlay 导航播报会改用该通道；音乐、通话和 Siri 仍使用原有输出。若车机不支持所选流类型，将自动回退到系统导航音频路由。</string>
     <string name="route_aaos_audio_buses_by_carplay_audio_type">按 CarPlay 音频类型路由 AAOS 音频总线</string>
     <string name="cluster_waiting_for_map">DiPlay · 等待 CarPlay 地图</string>
+    <string name="option_size_large">大</string>
+    <string name="option_size_medium">中</string>
+    <string name="option_size_small">小</string>
+    <string name="option_theme_scenario">场景 · 侧边地图</string>
+    <string name="option_theme_map">地图 · 全屏地图</string>
+    <string name="option_theme_simple">简约 · 侧边地图</string>
+    <string name="option_contrast_default">主题默认</string>
+    <string name="option_contrast_light">浅色背景 · 深色仪表</string>
+    <string name="option_contrast_dark">深色背景 · 浅色仪表</string>
+    <string name="hotspot_error_empty_name">请输入车载热点名称</string>
+    <string name="hotspot_error_long_name">热点名称不能超过32字节</string>
+    <string name="hotspot_error_invalid_character">名称或密码包含无效字符</string>
+    <string name="hotspot_error_password_length">热点密码长度必须为8至63个字符</string>
+    <string name="notification_channel_carplay_connection">CarPlay 连接</string>
+    <string name="notification_carplay_connection_running">CarPlay 连接正在运行</string>
+    <string name="preview_navigation_audio">导航音频：</string>
 </resources>

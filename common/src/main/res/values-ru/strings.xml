@@ -387,4 +387,25 @@
     <string name="your_phone_your_drive">ВАШ ТЕЛЕФОН. ВАША ПОЕЗДКА.</string>
     <string name="your_report_was_saved_to_the_selected_location">Отчёт сохранён в выбранном месте.</string>
     <string name="cluster_waiting_for_map">DiPlay · ожидание карты CarPlay</string>
+    <string name="navigation_system_default_recommended">Системный по умолчанию · рекомендуется</string>
+    <string name="navigation_stream_type_byd_dilink">Тип потока %1$d · BYD DiLink</string>
+    <string name="navigation_stream_type_value">Тип потока %1$d</string>
+    <string name="byd_dilink_navigation_audio_hint">Для BYD DiLink 5.0 попробуйте тип потока 14. Перенаправляются только подсказки CarPlay; музыка, звонки и Siri используют обычные выходы. Неподдерживаемый тип потока автоматически переключается на системный маршрут навигации.</string>
+    <string name="route_aaos_audio_buses_by_carplay_audio_type">Направлять аудиошины AAOS по типу звука CarPlay</string>
+    <string name="option_size_large">Большой</string>
+    <string name="option_size_medium">Средний</string>
+    <string name="option_size_small">Маленький</string>
+    <string name="option_theme_scenario">Сценарий · карта сбоку</string>
+    <string name="option_theme_map">Карта · полная карта</string>
+    <string name="option_theme_simple">Простой · карта сбоку</string>
+    <string name="option_contrast_default">По умолчанию для темы</string>
+    <string name="option_contrast_light">Светлый фон · тёмные приборы</string>
+    <string name="option_contrast_dark">Тёмный фон · светлые приборы</string>
+    <string name="hotspot_error_empty_name">Введите имя точки доступа автомобиля</string>
+    <string name="hotspot_error_long_name">Имя точки доступа не должно превышать 32 байта</string>
+    <string name="hotspot_error_invalid_character">Имя или пароль содержит недопустимый символ</string>
+    <string name="hotspot_error_password_length">Пароль точки доступа должен содержать от 8 до 63 символов</string>
+    <string name="notification_channel_carplay_connection">Подключение CarPlay</string>
+    <string name="notification_carplay_connection_running">Подключение CarPlay активно</string>
+    <string name="preview_navigation_audio">Звук навигации:\u0020</string>
 </resources>
